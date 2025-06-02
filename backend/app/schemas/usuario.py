@@ -21,7 +21,7 @@ class UsuarioBase(BaseModel):
     idade: int  = Field(None, ge=5, le=100, description="Idade mínima é de 5 anos e idade máxima é de 100")
     peso: float = Field(None, ge=5, le=300, description="Peso mínimo é de 5kg e peso máximo é de 300kg")
     horario_dormir: time
-    horario_acordar: time
+    dorme_por_dia: int
     capacidade_garrafa_ml: int = Field(None, ge=100, le=2000)
     
     class Config:
@@ -38,7 +38,7 @@ class UsuarioUpdate(UsuarioBase):
     senha: Optional[str] | None
     idade: Optional[int]  = Field(None, ge=5, le=100, description="Idade mínima é de 5 anos e idade máxima é de 100")
     peso: Optional[float] = Field(None, ge=5, le=300, description="Peso mínimo é de 5kg e peso máximo é de 300kg")
-    horario_acordar: Optional[time] | None
+    dorme_por_dia: Optional[int] | None
     horario_dormir: Optional[time] | None
     capacidade_garrafa_ml: Optional[int] | None
     criado_em: Optional[date] | None

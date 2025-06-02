@@ -12,6 +12,6 @@ class MetaDiaria(Base):
     meta_ml = Column(Integer, default=0)
     consumo_atual_ml = Column(Integer)
     meta_alcancada = Column(Boolean)
-    id_user = Column(Integer, ForeignKey('usuario.id_user'), nullable=True)
+    id_user = Column(Integer, ForeignKey('usuario.id_user', ondelete='CASCADE'), nullable=True)
     usuario = relationship("Usuarios", back_populates="meta")
 

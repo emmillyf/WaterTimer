@@ -11,7 +11,12 @@ class MetaDiaria(BaseModel):
         from_attributes = True
 
 class MetaDiariaResponse(MetaDiaria):
+    id_user: int
     data: date
 
     class Config:
         from_attributes = True
+
+class MetaDiariaRequest(BaseModel):
+    consumo_atual_ml: int
+
