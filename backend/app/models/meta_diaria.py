@@ -14,4 +14,4 @@ class MetaDiaria(Base):
     meta_alcancada = Column(Boolean)
     id_user = Column(Integer, ForeignKey('usuario.id_user', ondelete='CASCADE'), nullable=True)
     usuario = relationship("Usuarios", back_populates="meta")
-
+    # lembrete = relationship("LembreteHidratacao", back_populates="meta", cascade="all, delete")

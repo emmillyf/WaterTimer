@@ -2,25 +2,32 @@ from fastapi import status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database.conexao import get_db
+from utils.security import get_user_atual
 import services.usuario as service
-from schemas.usuario import UsuarioResponse, UsuarioBase, UsuarioUpdate
+from schemas.usuario import (UsuarioResponse, 
+    UsuarioBase, 
+    UsuarioUpdate)
 
 router = APIRouter(
 )
 
 @router.get("/usuarios", response_model=list[UsuarioResponse])
 async def buscar_usuarios(db: Session = Depends(get_db)):
-    try: 
-        return service.get_all(db)
+    try:
+        usuarios = service.get_all(db)
+        print("📦 Resposta que será retornada:", usuarios)
+        return usuarios
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e))
+            detail=str(e)
+        )
 
 @router.get("/usuarios/{id_user}", response_model=UsuarioResponse)
 async def buscar_usuario_id(id_user:int, db: Session = Depends(get_db)):
     try:
         usuario = service.get_by_id(db, id_user)
+        print("📦 Resposta que será retornada:", usuario)
         return usuario
     except ValueError as e:
         raise HTTPException(
@@ -49,9 +56,10 @@ async def criar_usuario(user_data: UsuarioBase, db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @router.put("/usuarios/{id_user}", response_model=UsuarioUpdate)
-async def atualizar_usuario(id_user: int, user_data: UsuarioUpdate, db: Session = Depends(get_db)):
+async def atualizar_usuario(id_user: int, user_data: UsuarioUpdate,
+db: Session = Depends(get_db), current_user: UsuarioUpdate = Depends(get_user_atual)):
     try:
-        atualizando_usuario = service.put_user(db, id_user, user_data.model_dump())
+        atualizando_usuario = service.put_user(db, id_user, user_data.model_dump(), current_user)
         return atualizando_usuario
     except ValueError:
         raise HTTPException(
@@ -69,9 +77,9 @@ async def deletar_todos_usuarios(db: Session = Depends(get_db)):
             detail=str(e))
 
 @router.delete("/usuarios/{id_user}")
-async def deletar_usuario_id(id_user: int, db: Session = Depends(get_db)):
+async def deletar_usuario_id(id_user: int, db: Session = Depends(get_db), current_user: UsuarioBase = Depends(get_user_atual)):
     try:
-        service.delete_user_by_id(db, id_user)
+        service.delete_user_by_id(db, id_user, current_user)
         return {"message": "Usuário deletado com sucesso"}
     except ValueError as e:
         raise HTTPException(

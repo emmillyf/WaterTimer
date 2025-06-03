@@ -17,13 +17,47 @@ def get_all(db: Session):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao buscar metas diárias")
 
-def get_meta_by_id(db: Session, id_usuario: int) -> MetaDiaria:
+def get_meta_by_id(db: Session, id_user: int) -> MetaDiaria:
     try:
-        return db.query(MetaDiaria).filter(MetaDiaria.id_user==id_usuario).first()
+        return db.query(MetaDiaria).filter(MetaDiaria.id_user==id_user).first()
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao buscar meta do usuário")
+
+def get_meta_diaria(db: Session, id_user: int, user_data: dict) -> MetaDiaria:
+    try:
+        dia_atual = date.today()
+        meta_atual = db.query(MetaDiaria).filter(
+            MetaDiaria.id_user == id_user,
+            MetaDiaria.data == dia_atual
+        ).first()
+
+        if meta_atual:
+            return meta_atual
+        
+        try:
+            ml_recomendado = post_meta(db, user_data, id_user)
+            
+            nova_meta_diaria = MetaDiaria(
+                quantidade_ml=ml_recomendado,
+                consumo_atual_ml=0,
+                meta_alcancada=False,
+                id_user=id_user,
+                data=dia_atual 
+            )
+            db.add(nova_meta_diaria)
+            db.commit()
+            db.refresh(nova_meta_diaria)
+            return nova_meta_diaria
+        except HTTPException as e:
+            raise e
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao criar meta diária para hoje para o usuário {id_user}: {str(e)}"
+        )
 
 def post_meta(db: Session, user_data: dict, id_user: int):
     try:
@@ -102,7 +136,7 @@ def put_consumo_diario(db: Session, id_user: int, ml_consumida: int):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao atualizar consumo: {str(e)}")
-    
+  
 def delete_metas(db: Session):
     try:
         deletados = db.query(MetaDiaria).delete()

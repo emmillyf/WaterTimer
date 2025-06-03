@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, TIMESTAMP, Time
+from sqlalchemy import Column, Integer, String, Numeric, TIMESTAMP, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from database.conexao import Base
@@ -12,7 +12,7 @@ class Usuarios(Base):
     senha = Column(String(255))
     idade = Column(Integer)
     peso = Column(Numeric(5,2))
-    horario_dormir = Column(Time)
+    horario_dormir = Column(DateTime)
     dorme_por_dia = Column(Integer)
     capacidade_garrafa_ml = Column(Integer)
     criado_em = Column(TIMESTAMP(timezone=True), server_default=func.now())
